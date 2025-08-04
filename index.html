@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Travel Photo Gallery</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+  font-family: 'Didot', serif;
+  background: #202123;  /* ChatGPT-like dark background */
+  color: #d3d6db;       /* light gray text */
+  padding: 40px 20px;
+  text-align: center;
+}
+
+h1, h2 {
+  color: #b5c6da; /* bright blue accent */
+  text-shadow: none; /* remove desert text shadows */
+}
+
+    .album-container {
+      max-width: 96vw;
+      margin: 0 auto 60px;
+    }
+
+    .slider {
+      position: relative;
+      overflow: hidden;
+      border-radius: 15px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    }
+
+    .slides {
+      display: flex;
+      transition: transform 0.5s ease;
+    }
+
+    .slides img {
+      width: 100%;
+      max-height: 80vh;
+      flex-shrink: 0;
+      object-fit: cover;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .nav-button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: rgba(0,0,0,0.4);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 24px;
+      z-index: 2;
+    }
+
+    .nav-button:hover {
+      background-color: rgba(0,0,0,0.7);
+    }
+
+    .prev { left: 10px; }
+    .next { right: 10px; }
+
+    .photo-menu {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      gap: 10px;
+      z-index: 5;
+      background: rgba(255,255,255,0.8);
+      border-radius: 6px;
+      padding: 5px 10px;
+    }
+
+    .photo-menu button {
+      padding: 8px 12px;
+      font-size: 14px;
+      background: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      transition: background-color 0.2s ease;
+    }
+
+    .photo-menu button:hover {
+      background-color: #f0f0f0;
+    }
+
+    .zoom-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .zoom-overlay img {
+      max-width: 95vw;
+      max-height: 95vh;
+      border-radius: 10px;
+      cursor: grab;
+      position: relative;
+      left: 0;
+      top: 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>My Travel Photo Gallery</h1>
+
+  <div class="album-container">
+    <h2>Arizona Trip</h2>
+    <div class="slider" data-index="0">
+      <div class="slides">
+        <div style="position: relative; flex-shrink:0; width: 100%;">
+          <img src="005263-R1-015-6.jpg" data-lat="33.4484" data-lng="-112.0740" alt="Arizona 1" />
+        </div>
+        <div style="position: relative; flex-shrink:0; width: 100%;">
+          <img src="005263-R1-019-8.jpg" data-lat="33.4484" data-lng="-112.0740" alt="Arizona 2" />
+        </div>
+        <div style="position: relative; flex-shrink:0; width: 100%;">
+          <img src="005263-R1-055-26.jpg" data-lat="33.4484" data-lng="-112.0740" alt="Arizona 3" />
+        </div>
+      </div>
+      <button class="nav-button prev">&#10094;</button>
+      <button class="nav-button next">&#10095;</button>
+    </div>
+  </div>
+
+  <div class="album-container">
+    <h2>Canyonlands</h2>
+    <div class="slider" data-index="0">
+      <div class="slides">
+        <div style="position: relative; flex-shrink:0; width: 100%;">
+          <img src="005263-R1-005-1.jpg" data-lat="38.3269" data-lng="-109.8783" alt="Canyonlands 1" />
+        </div>
+        <div style="position: relative; flex-shrink:0; width: 100%;">
+          <img src="005263-R1-011-4.jpg" data-lat="38.3269" data-lng="-109.8783" alt="Canyonlands 2" />
+        </div>
+        <div style="position: relative; flex-shrink:0; width: 100%;">
+          <img src="005263-R1-013-5.jpg" data-lat="38.3269" data-lng="-109.8783" alt="Canyonlands 3" />
+        </div>
+      </div>
+      <button class="nav-button prev">&#10094;</button>
+      <button class="nav-button next">&#10095;</button>
+    </div>
+  </div>
+
+  <script>
+    // Slider navigation per album
+    document.querySelectorAll('.slider').forEach(slider => {
+      const slides = slider.querySelector('.slides');
+      const images = slides.querySelectorAll('img');
+      const prev = slider.querySelector('.prev');
+      const next = slider.querySelector('.next');
+      let index = 0;
+
+      const updateSlide = () => {
+        slides.style.transform = `translateX(-${index * 100}%)`;
+      };
+
+      prev.addEventListener('click', () => {
+        index = (index - 1 + images.length) % images.length;
+        updateSlide();
+      });
+
+      next.addEventListener('click', () => {
+        index = (index + 1) % images.length;
+        updateSlide();
+      });
+
+      slider.dataset.index = index;
+    });
+
+    // Track which album is currently visible
+    let currentAlbumIndex = 0;
+    const albums = Array.from(document.querySelectorAll('.album-container'));
+
+    function showAlbum(index) {
+      albums.forEach((album, i) => {
+        album.style.display = (i === index) ? 'block' : 'none';
+        // Reset album internal slide index and position
+        const slider = album.querySelector('.slider');
+        slider.dataset.index = 0;
+        const slides = slider.querySelector('.slides');
+        slides.style.transform = 'translateX(0)';
+      });
+      currentAlbumIndex = index;
+    }
+
+    // Initialize: show only first album container
+    showAlbum(0);
+
+    // Handle scroll to navigate between albums
+  
+    window.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  if (e.deltaY > 0) {
+    if (currentAlbumIndex < albums.length - 1) {
+      currentAlbumIndex++;
+      showAlbum(currentAlbumIndex);
+    }
+  } else {
+    if (currentAlbumIndex > 0) {
+      currentAlbumIndex--;
+      showAlbum(currentAlbumIndex);
+    }
+  }
+}, { passive: false });
+
+    // Photo menu (zoom & location buttons)
+    document.querySelectorAll('.slides img').forEach(img => {
+      img.addEventListener('mouseenter', () => {
+        removeMenus();
+        const menu = document.createElement('div');
+        menu.className = 'photo-menu';
+
+        const zoomBtn = document.createElement('button');
+        zoomBtn.textContent = 'Zoom';
+        zoomBtn.onclick = () => zoomImage(img);
+
+        const mapBtn = document.createElement('button');
+        mapBtn.textContent = 'Location';
+        mapBtn.onclick = () => {
+          const lat = img.dataset.lat;
+          const lng = img.dataset.lng;
+          if (lat && lng) {
+            window.open(`https://maps.google.com/?q=${lat},${lng}`, '_blank');
+          }
+        };
+
+        menu.appendChild(zoomBtn);
+        menu.appendChild(mapBtn);
+
+        img.parentNode.appendChild(menu);
+
+        img.addEventListener('mouseleave', () => {
+          setTimeout(removeMenus, 500);
+        });
+      });
+    });
+
+    function removeMenus() {
+      document.querySelectorAll('.photo-menu').forEach(menu => menu.remove());
+    }
+
+    // Zoom functionality with pan
+    function zoomImage(img) {
+      const overlay = document.createElement('div');
+      overlay.className = 'zoom-overlay';
+      const zoomedImg = document.createElement('img');
+      zoomedImg.src = img.src;
+      overlay.appendChild(zoomedImg);
+
+      let isDragging = false, startX, startY;
+      zoomedImg.style.position = 'relative';
+
+      zoomedImg.addEventListener('mousedown', e => {
+        isDragging = true;
+        startX = e.pageX - zoomedImg.offsetLeft;
+        startY = e.pageY - zoomedImg.offsetTop;
+        zoomedImg.style.cursor = 'grabbing';
+      });
+
+      document.addEventListener('mouseup', () => {
+        isDragging = false;
+        zoomedImg.style.cursor = 'grab';
+      });
+
+      document.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        e.preventDefault();
+        zoomedImg.style.left = `${e.pageX - startX}px`;
+        zoomedImg.style.top = `${e.pageY - startY}px`;
+      });
+
+      overlay.addEventListener('click', () => {
+        overlay.remove();
+      });
+
+      document.body.appendChild(overlay);
+    }
+  </script>
+</body>
+</html>
+
+
+
