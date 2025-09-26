@@ -1,304 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>My Travel Photo Gallery</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<meta charset="UTF-8">
+<title>Travel Gallery</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body { font-family:'Didot', serif; background:#fff; color:#202123; text-align:center; }
 
-    body {
-  font-family: 'Didot', serif;
-  background: #202123;  /* ChatGPT-like dark background */
-  color: #d3d6db;       /* light gray text */
-  padding: 40px 20px;
-  text-align: center;
+.top-link { position:fixed; top:20px; right:20px; z-index:999; }
+.top-link button { font-family:'Montserrat',sans-serif; font-weight:600; padding:10px 15px; background:#b5c6da; color:#202123; border-radius:5px; border:none; cursor:pointer; transition:0.3s; }
+.top-link button:hover{background:#8ea4bd;}
+
+.hero { height:100vh; width:100%; background:url("006368-R1-E008.jpg") no-repeat center/cover; display:flex; align-items:flex-start; justify-content:flex-start; padding:15vh 6% 0 6%; }
+.hero-content { text-align:left; color:white; max-width:600px; }
+.hero h1 { font-family:'Montserrat',sans-serif; font-weight:600; font-size:5rem; line-height:1.1; }
+.hero p { font-family:'Montserrat',sans-serif; font-weight:400; font-size:1.2rem; margin-top:10px; }
+.enter-btn { display:inline-block; margin-top:30px; padding:12px 24px; background:#b5c6da; color:#202123; font-family:'Montserrat',sans-serif; font-weight:700; text-decoration:none; border-radius:6px; transition:0.3s; }
+.enter-btn:hover{background:#8ea4bd;}
+
+h2 { color:#202123; margin-bottom:20px; }
+.album-container { max-width:96vw; margin:40px auto 60px; }
+.slider { position:relative; overflow:hidden; box-shadow:0 6px 15px rgba(0,0,0,0.3); }
+.slides { display:flex; transition:transform 0.5s ease; }
+.slides img { width:100%; max-height:80vh; flex-shrink:0; object-fit:cover; cursor:pointer; }
+.nav-button { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.4); color:white; border:none; padding:10px 20px; cursor:pointer; font-size:24px; z-index:2; }
+.nav-button:hover{background:rgba(0,0,0,0.7);}
+.prev{left:10px;} .next{right:10px;}
+
+.bubbles { display:flex; justify-content:center; gap:8px; margin-top:10px; }
+.bubbles span { width:12px; height:12px; border-radius:50%; background:#888; display:inline-block; cursor:pointer; transition:0.3s; }
+.bubbles span.active{background:#b5c6da;}
+
+#post-cards { display:none; margin:80px auto; max-width:96vw; }
+#post-cards h2{margin-bottom:20px;}
+.mini-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.mini-grid img { width:100%; aspect-ratio:4/3; object-fit:cover; cursor:pointer; }
+
+.zoom-overlay {
+  position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8);
+  display:flex; align-items:center; justify-content:center; z-index:1000;
 }
 
-h1, h2 {
-  color: #b5c6da; /* bright blue accent */
-  text-shadow: none; /* remove desert text shadows */
+.zoom-card {
+  perspective:1000px;
+  max-width:90vw; max-height:90vh;
 }
 
-    .album-container {
-      max-width: 96vw;
-      margin: 0 auto 60px;
-    }
+.zoom-card-inner {
+  position:relative;
+  width:100%; height:100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  cursor:pointer;
+}
 
-    .slider {
-      position: relative;
-      overflow: hidden;
-      border-radius: 15px;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-    }
+.zoom-card-inner.flipped { transform: rotateY(180deg); }
 
-    .slides {
-      display: flex;
-      transition: transform 0.5s ease;
-    }
+.zoom-card img {
+  width:100%; height:auto; max-height:90vh; display:block; object-fit:contain;
+  backface-visibility:hidden; border-radius:5px;
+}
 
-    .slides img {
-      width: 100%;
-      max-height: 80vh;
-      flex-shrink: 0;
-      object-fit: cover;
-      cursor: pointer;
-      position: relative;
-    }
+.zoom-card .back {
+  position:absolute;
+  top:0; left:0;
+  transform: rotateY(180deg);
+}
 
-    .nav-button {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background-color: rgba(0,0,0,0.4);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      cursor: pointer;
-      font-size: 24px;
-      z-index: 2;
-    }
+.close-zoom { position:absolute; top:20px; right:20px; background:#b5c6da; color:#202123; border:none; border-radius:5px; padding:10px 15px; font-weight:600; cursor:pointer; z-index:1001; }
+.close-zoom:hover { background:#8ea4bd; }
 
-    .nav-button:hover {
-      background-color: rgba(0,0,0,0.7);
-    }
-
-    .prev { left: 10px; }
-    .next { right: 10px; }
-
-    .photo-menu {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      display: flex;
-      gap: 10px;
-      z-index: 5;
-      background: rgba(255,255,255,0.8);
-      border-radius: 6px;
-      padding: 5px 10px;
-    }
-
-    .photo-menu button {
-      padding: 8px 12px;
-      font-size: 14px;
-      background: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      transition: background-color 0.2s ease;
-    }
-
-    .photo-menu button:hover {
-      background-color: #f0f0f0;
-    }
-
-    .zoom-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
-    }
-
-    .zoom-overlay img {
-      max-width: 95vw;
-      max-height: 95vh;
-      border-radius: 10px;
-      cursor: grab;
-      position: relative;
-      left: 0;
-      top: 0;
-    }
-  </style>
+</style>
 </head>
 <body>
+
+<div class="top-link">
+  <button id="toggle-postcards">Post Cards</button>
+</div>
+
+<section class="hero">
+  <div class="hero-content">
+    <h1>Wyatt Bright</h1>
+    <p>Travel & Adventure Photographer</p>
+    <a href="#gallery" class="enter-btn">Enter Gallery</a>
+  </div>
+</section>
+
+<section id="gallery">
   <h1>My Travel Photo Gallery</h1>
 
   <div class="album-container">
     <h2>Arizona Trip</h2>
     <div class="slider" data-index="0">
       <div class="slides">
-        <div style="position: relative; flex-shrink:0; width: 100%;">
-          <img src="005263-R1-015-6.jpg" data-lat="33.4484" data-lng="-112.0740" alt="Arizona 1" />
-        </div>
-        <div style="position: relative; flex-shrink:0; width: 100%;">
-          <img src="005263-R1-019-8.jpg" data-lat="33.4484" data-lng="-112.0740" alt="Arizona 2" />
-        </div>
-        <div style="position: relative; flex-shrink:0; width: 100%;">
-          <img src="005263-R1-055-26.jpg" data-lat="33.4484" data-lng="-112.0740" alt="Arizona 3" />
-        </div>
+        <img src="005263-R1-015-6.jpg" alt="Arizona 1">
+        <img src="005263-R1-019-8.jpg" alt="Arizona 2">
+        <img src="005263-R1-055-26.jpg" alt="Arizona 3">
       </div>
       <button class="nav-button prev">&#10094;</button>
       <button class="nav-button next">&#10095;</button>
     </div>
+    <div class="bubbles"></div>
   </div>
 
   <div class="album-container">
     <h2>Canyonlands</h2>
     <div class="slider" data-index="0">
       <div class="slides">
-        <div style="position: relative; flex-shrink:0; width: 100%;">
-          <img src="005263-R1-005-1.jpg" data-lat="38.3269" data-lng="-109.8783" alt="Canyonlands 1" />
-        </div>
-        <div style="position: relative; flex-shrink:0; width: 100%;">
-          <img src="005263-R1-011-4.jpg" data-lat="38.3269" data-lng="-109.8783" alt="Canyonlands 2" />
-        </div>
-        <div style="position: relative; flex-shrink:0; width: 100%;">
-          <img src="005263-R1-013-5.jpg" data-lat="38.3269" data-lng="-109.8783" alt="Canyonlands 3" />
-        </div>
+        <img src="005263-R1-005-1.jpg" alt="Canyonlands 1">
+        <img src="005263-R1-011-4.jpg" alt="Canyonlands 2">
+        <img src="005263-R1-013-5.jpg" alt="Canyonlands 3">
       </div>
       <button class="nav-button prev">&#10094;</button>
       <button class="nav-button next">&#10095;</button>
     </div>
+    <div class="bubbles"></div>
   </div>
 
-  <script>
-    // Slider navigation per album
-    document.querySelectorAll('.slider').forEach(slider => {
-      const slides = slider.querySelector('.slides');
-      const images = slides.querySelectorAll('img');
-      const prev = slider.querySelector('.prev');
-      const next = slider.querySelector('.next');
-      let index = 0;
+</section>
 
-      const updateSlide = () => {
-        slides.style.transform = `translateX(-${index * 100}%)`;
-      };
+<section id="post-cards">
+  <h2>Post Cards</h2>
+  <div class="mini-grid">
+    <img src="005263-R1-015-6.jpg">
+    <img src="005263-R1-019-8.jpg">
+    <img src="005263-R1-055-26.jpg">
+    <img src="005263-R1-005-1.jpg">
+    <img src="005263-R1-011-4.jpg">
+    <img src="005263-R1-013-5.jpg">
+    <img src="005263-R1-015-6.jpg">
+    <img src="005263-R1-019-8.jpg">
+    <img src="005263-R1-055-26.jpg">
+    <img src="005263-R1-005-1.jpg">
+  </div>
+</section>
 
-      prev.addEventListener('click', () => {
-        index = (index - 1 + images.length) % images.length;
-        updateSlide();
-      });
+<script>
+const toggleBtn=document.getElementById('toggle-postcards');
+const postCards=document.getElementById('post-cards');
+const hero=document.querySelector('.hero');
+const gallery=document.getElementById('gallery');
 
-      next.addEventListener('click', () => {
-        index = (index + 1) % images.length;
-        updateSlide();
-      });
-
-      slider.dataset.index = index;
-    });
-
-    // Track which album is currently visible
-    let currentAlbumIndex = 0;
-    const albums = Array.from(document.querySelectorAll('.album-container'));
-
-    function showAlbum(index) {
-      albums.forEach((album, i) => {
-        album.style.display = (i === index) ? 'block' : 'none';
-        // Reset album internal slide index and position
-        const slider = album.querySelector('.slider');
-        slider.dataset.index = 0;
-        const slides = slider.querySelector('.slides');
-        slides.style.transform = 'translateX(0)';
-      });
-      currentAlbumIndex = index;
-    }
-
-    // Initialize: show only first album container
-    showAlbum(0);
-
-    // Handle scroll to navigate between albums
-  
-    window.addEventListener('wheel', (e) => {
-  e.preventDefault();
-  if (e.deltaY > 0) {
-    if (currentAlbumIndex < albums.length - 1) {
-      currentAlbumIndex++;
-      showAlbum(currentAlbumIndex);
-    }
+toggleBtn.addEventListener('click',()=>{
+  if(postCards.style.display==='block'){
+    postCards.style.display='none';
+    hero.style.display='flex';
+    gallery.style.display='block';
+    toggleBtn.textContent='Post Cards';
+    window.scrollTo({top:0,behavior:'smooth'});
   } else {
-    if (currentAlbumIndex > 0) {
-      currentAlbumIndex--;
-      showAlbum(currentAlbumIndex);
-    }
+    hero.style.display='none';
+    gallery.style.display='none';
+    postCards.style.display='block';
+    toggleBtn.textContent='Gallery';
+    postCards.scrollIntoView({behavior:'smooth'});
   }
-}, { passive: false });
+});
 
-    // Photo menu (zoom & location buttons)
-    document.querySelectorAll('.slides img').forEach(img => {
-      img.addEventListener('mouseenter', () => {
-        removeMenus();
-        const menu = document.createElement('div');
-        menu.className = 'photo-menu';
+// Slider navigation and bubbles
+document.querySelectorAll('.slider').forEach(slider=>{
+  const slides=slider.querySelector('.slides');
+  const images=slides.querySelectorAll('img');
+  const prev=slider.querySelector('.prev');
+  const next=slider.querySelector('.next');
+  let index=0;
 
-        const zoomBtn = document.createElement('button');
-        zoomBtn.textContent = 'Zoom';
-        zoomBtn.onclick = () => zoomImage(img);
+  const bubbleContainer=slider.parentElement.querySelector('.bubbles');
+  images.forEach((img,i)=>{
+    const bubble=document.createElement('span');
+    if(i===0) bubble.classList.add('active');
+    bubbleContainer.appendChild(bubble);
+    bubble.addEventListener('click',()=>{ index=i; updateSlide(); });
+  });
+  const bubbles=bubbleContainer.querySelectorAll('span');
+  const updateSlide=()=>{ slides.style.transform=`translateX(-${index*100}%)`; bubbles.forEach((b,i)=>b.classList.toggle('active',i===index)); };
+  prev.addEventListener('click',()=>{ index=(index-1+images.length)%images.length; updateSlide(); });
+  next.addEventListener('click',()=>{ index=(index+1)%images.length; updateSlide(); });
+});
 
-        const mapBtn = document.createElement('button');
-        mapBtn.textContent = 'Location';
-        mapBtn.onclick = () => {
-          const lat = img.dataset.lat;
-          const lng = img.dataset.lng;
-          if (lat && lng) {
-            window.open(`https://maps.google.com/?q=${lat},${lng}`, '_blank');
-          }
-        };
+// Post Card Zoom + Flip
+document.querySelectorAll('.mini-grid img').forEach(img=>{
+  img.addEventListener('click',()=>openZoomCard(img));
+});
 
-        menu.appendChild(zoomBtn);
-        menu.appendChild(mapBtn);
+function openZoomCard(img){
+  const overlay=document.createElement('div'); overlay.className='zoom-overlay';
+  const zoomCard=document.createElement('div'); zoomCard.className='zoom-card';
+  const inner=document.createElement('div'); inner.className='zoom-card-inner';
 
-        img.parentNode.appendChild(menu);
+  const front=document.createElement('img'); front.src=img.src; front.className='front';
+  const back=document.createElement('img'); back.src='005263-R1-011-4.jpg'; back.className='back';
 
-        img.addEventListener('mouseleave', () => {
-          setTimeout(removeMenus, 500);
-        });
-      });
-    });
+  inner.appendChild(front); inner.appendChild(back);
+  zoomCard.appendChild(inner);
+  overlay.appendChild(zoomCard);
 
-    function removeMenus() {
-      document.querySelectorAll('.photo-menu').forEach(menu => menu.remove());
-    }
+  const closeBtn=document.createElement('button'); closeBtn.textContent='Close'; closeBtn.className='close-zoom';
+  closeBtn.addEventListener('click',()=>overlay.remove());
+  overlay.appendChild(closeBtn);
 
-    // Zoom functionality with pan
-    function zoomImage(img) {
-      const overlay = document.createElement('div');
-      overlay.className = 'zoom-overlay';
-      const zoomedImg = document.createElement('img');
-      zoomedImg.src = img.src;
-      overlay.appendChild(zoomedImg);
+  inner.addEventListener('click', e=>{
+    if(e.target===closeBtn) return;
+    inner.classList.toggle('flipped');
+  });
 
-      let isDragging = false, startX, startY;
-      zoomedImg.style.position = 'relative';
-
-      zoomedImg.addEventListener('mousedown', e => {
-        isDragging = true;
-        startX = e.pageX - zoomedImg.offsetLeft;
-        startY = e.pageY - zoomedImg.offsetTop;
-        zoomedImg.style.cursor = 'grabbing';
-      });
-
-      document.addEventListener('mouseup', () => {
-        isDragging = false;
-        zoomedImg.style.cursor = 'grab';
-      });
-
-      document.addEventListener('mousemove', e => {
-        if (!isDragging) return;
-        e.preventDefault();
-        zoomedImg.style.left = `${e.pageX - startX}px`;
-        zoomedImg.style.top = `${e.pageY - startY}px`;
-      });
-
-      overlay.addEventListener('click', () => {
-        overlay.remove();
-      });
-
-      document.body.appendChild(overlay);
-    }
-  </script>
+  document.body.appendChild(overlay);
+}
+</script>
 </body>
 </html>
+
+
+
+
+
+
+
+
 
 
 
