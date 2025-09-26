@@ -1,97 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Travel Gallery</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-* { box-sizing:border-box; margin:0; padding:0; }
-html { scroll-behavior:smooth; }
-body { font-family:'Didot', serif; background:#fff; color:#202123; text-align:center; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { scroll-behavior:smooth; }
+  body { font-family:'Didot', serif; background:#fff; color:#202123; text-align:center; }
 
-.hero { height:100vh; width:100%; background:url("006368-R1-E008.jpg") no-repeat center/cover; display:flex; align-items:flex-start; justify-content:flex-start; padding:15vh 6% 0 6%; }
-.hero-content { text-align:left; color:white; max-width:600px; }
-.hero h1 { font-family:'Montserrat',sans-serif; font-weight:600; font-size:5rem; line-height:1.1; }
-.hero p { font-family:'Montserrat',sans-serif; font-weight:400; font-size:1.2rem; margin-top:10px; }
-.enter-btn, #postcards-btn { display:inline-block; margin-top:20px; padding:12px 24px; background:#b5c6da; color:#202123; font-family:'Montserrat',sans-serif; font-weight:700; text-decoration:none; border-radius:6px; transition:0.3s; cursor:pointer; }
-.enter-btn:hover, #postcards-btn:hover { background:#8ea4bd; }
+  .hero { height:100vh; width:100%; background:url("006368-R1-E008.jpg") no-repeat center/cover; display:flex; align-items:flex-start; justify-content:flex-start; padding:15vh 6% 0 6%; }
+  .hero-content { text-align:left; color:white; max-width:600px; }
+  .hero h1 { font-family:'Montserrat',sans-serif; font-weight:600; font-size:5rem; line-height:1.1; }
+  .hero p { font-family:'Montserrat',sans-serif; font-weight:400; font-size:1.2rem; margin-top:10px; }
+  .enter-btn, #postcards-btn { display:inline-block; margin-top:20px; padding:12px 24px; background:#b5c6da; color:#202123; font-family:'Montserrat',sans-serif; font-weight:700; text-decoration:none; border-radius:6px; transition:0.3s; cursor:pointer; }
+  .enter-btn:hover, #postcards-btn:hover { background:#8ea4bd; }
 
-h2 { color:#202123; margin-bottom:20px; }
-.album-container { max-width:96vw; margin:40px auto 60px; }
-.slider { position:relative; overflow:hidden; box-shadow:0 6px 15px rgba(0,0,0,0.3); }
-.slides { display:flex; transition:transform 0.5s ease; will-change:transform; }
-.slides img { flex:0 0 100%; width:100%; max-height:80vh; object-fit:cover; cursor:pointer; }
-.nav-button { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.4); color:white; border:none; padding:10px 20px; cursor:pointer; font-size:24px; z-index:2; }
-.nav-button:hover{background:rgba(0,0,0,0.7);}
-.prev{left:10px;} .next{right:10px;}
+  h2 { color:#202123; margin-bottom:20px; }
+  .album-container { max-width:96vw; margin:40px auto 60px; }
+  .slider { position:relative; overflow:hidden; box-shadow:0 6px 15px rgba(0,0,0,0.3); }
+  /* using scroll-snap and native scrolling for reliability on touch devices */
+  .slides {
+    display:flex;
+    transition:transform 0.45s ease;
+    will-change:transform;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+    scroll-behavior:smooth;
+    -ms-overflow-style: none;  /* IE/Edge scrollbar hidden */
+    scrollbar-width: none;     /* Firefox */
+  }
+  .slides::-webkit-scrollbar { display:none; } /* Chrome/Safari scrollbar hidden */
 
-.bubbles { display:flex; justify-content:center; gap:8px; margin-top:10px; }
-.bubbles span { width:12px; height:12px; border-radius:50%; background:#888; display:inline-block; cursor:pointer; transition:0.3s; }
-.bubbles span.active{background:#b5c6da;}
+  .slides img { flex:0 0 100%; width:100%; max-height:80vh; object-fit:cover; cursor:pointer; scroll-snap-align:center; }
+  .nav-button { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.4); color:white; border:none; padding:10px 20px; cursor:pointer; font-size:24px; z-index:2; }
+  .nav-button:hover{background:rgba(0,0,0,0.7);}
+  .prev{left:10px;} .next{right:10px;}
 
-#post-cards { display:none; margin:80px auto; max-width:96vw; position:relative; }
-#post-cards h2{margin-bottom:20px;}
-#post-cards .back-to-gallery { position:absolute; top:10px; right:10px; z-index:10; background:#b5c6da; color:#202123; border:none; border-radius:6px; padding:10px 15px; font-family:'Montserrat',sans-serif; font-weight:700; cursor:pointer; }
-#post-cards .back-to-gallery:hover { background:#8ea4bd; }
+  .bubbles { display:flex; justify-content:center; gap:8px; margin-top:10px; }
+  .bubbles span { width:12px; height:12px; border-radius:50%; background:#888; display:inline-block; cursor:pointer; transition:0.3s; }
+  .bubbles span.active{background:#b5c6da;}
 
-.mini-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-.mini-grid img { width:100%; aspect-ratio:4/3; object-fit:cover; cursor:pointer; }
+  #post-cards { display:none; margin:80px auto; max-width:96vw; position:relative; padding:18px 8px 28px 8px; }
+  #post-cards h2{margin-bottom:12px;}
+  /* moved button below h2 in DOM so it doesn't overlap heading; mobile rule makes it a block-level flow item */
+  #post-cards .back-to-gallery { position:absolute; top:10px; right:10px; z-index:10; background:#b5c6da; color:#202123; border:none; border-radius:6px; padding:10px 15px; font-family:'Montserrat',sans-serif; font-weight:700; cursor:pointer; }
+  #post-cards .back-to-gallery:hover { background:#8ea4bd; }
 
-.zoom-overlay {
-  position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8);
-  display:flex; align-items:center; justify-content:center; z-index:1000;
-}
+  .mini-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+  .mini-grid img { width:100%; aspect-ratio:4/3; object-fit:cover; cursor:pointer; }
 
-.zoom-card {
-  perspective:1000px;
-  max-width:90vw; max-height:90vh;
-}
+  .zoom-overlay {
+    position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8);
+    display:flex; align-items:center; justify-content:center; z-index:1000;
+  }
 
-.zoom-card-inner {
-  position:relative;
-  width:100%; height:100%;
-  transition: transform 0.6s;
-  transform-style: preserve-3d;
-  cursor:pointer;
-}
+  .zoom-card {
+    perspective:1000px;
+    max-width:90vw; max-height:90vh;
+  }
 
-.zoom-card-inner.flipped { transform: rotateY(180deg); }
+  .zoom-card-inner {
+    position:relative;
+    width:100%; height:100%;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    cursor:pointer;
+  }
 
-.zoom-card img {
-  width:100%; height:auto; max-height:90vh; display:block; object-fit:contain;
-  backface-visibility:hidden; border-radius:5px;
-}
+  .zoom-card-inner.flipped { transform: rotateY(180deg); }
 
-.zoom-card .back {
-  position:absolute;
-  top:0; left:0;
-  transform: rotateY(180deg);
-}
+  .zoom-card img {
+    width:100%; height:auto; max-height:90vh; display:block; object-fit:contain;
+    backface-visibility:hidden; border-radius:5px;
+  }
 
-.close-zoom { position:absolute; top:20px; right:20px; background:#b5c6da; color:#202123; border:none; border-radius:5px; padding:10px 15px; font-weight:600; cursor:pointer; z-index:1001; }
-.close-zoom:hover { background:#8ea4bd; }
+  .zoom-card .back {
+    position:absolute;
+    top:0; left:0;
+    transform: rotateY(180deg);
+  }
 
-/* Responsive adjustments */
-@media (max-width: 1024px) {
-  .hero h1 { font-size:4rem; }
-  .hero p { font-size:1.1rem; }
-}
-@media (max-width: 768px) {
-  .hero { padding:5vh 4% 0 4%; background-size:cover; background-position:center; }
-  .hero h1 { font-size:2.4rem; }
-  .hero p { font-size:0.95rem; }
-  .enter-btn, #postcards-btn { padding:8px 12px; font-size:14px; }
+  .close-zoom { position:absolute; top:20px; right:20px; background:#b5c6da; color:#202123; border:none; border-radius:5px; padding:10px 15px; font-weight:600; cursor:pointer; z-index:1001; }
+  .close-zoom:hover { background:#8ea4bd; }
 
-  .slider img { max-height:65vh; }
-  .nav-button { display:none; } /* hide arrows on mobile */
-  .bubbles { margin-top:6px; justify-content:center; }
-  .bubbles span { width:7px; height:7px; opacity:0.3; pointer-events:none; }
-}
+  /* Responsive adjustments */
+  @media (max-width: 1024px) {
+    .hero h1 { font-size:4rem; }
+    .hero p { font-size:1.1rem; }
+  }
+  @media (max-width: 768px) {
+    .hero { padding:5vh 4% 0 4%; background-size:cover; background-position:center; }
+    .hero h1 { font-size:2.4rem; }
+    .hero p { font-size:0.95rem; }
+    .enter-btn, #postcards-btn { padding:8px 12px; font-size:14px; }
 
-@media (max-width: 480px) {
-  .mini-grid { grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); }
-}
+    .slider img { max-height:65vh; }
+    .nav-button { display:none; } /* hide arrows on mobile */
+    .bubbles { margin-top:6px; justify-content:center; }
+    .bubbles span { width:7px; height:7px; opacity:0.3; }
+
+    /* Put the back button into the normal flow on small screens so it doesn't overlap the heading */
+    #post-cards .back-to-gallery {
+      position:static;
+      display:inline-block;
+      margin:8px auto 14px auto;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .mini-grid { grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); }
+  }
 </style>
 </head>
 <body>
@@ -138,24 +159,24 @@ h2 { color:#202123; margin-bottom:20px; }
 </section>
 
 <section id="post-cards">
-  <button class="back-to-gallery">Back to Gallery</button>
   <h2>Post Cards</h2>
+  <button class="back-to-gallery">Back to Gallery</button>
   <div class="mini-grid">
-    <img src="005263-R1-015-6.jpg">
-    <img src="005263-R1-019-8.jpg">
-    <img src="005263-R1-055-26.jpg">
-    <img src="005263-R1-005-1.jpg">
-    <img src="005263-R1-011-4.jpg">
-    <img src="005263-R1-013-5.jpg">
-    <img src="005263-R1-015-6.jpg">
-    <img src="005263-R1-019-8.jpg">
-    <img src="005263-R1-055-26.jpg">
-    <img src="005263-R1-005-1.jpg">
+    <img src="005263-R1-015-6.jpg" alt="pc1">
+    <img src="005263-R1-019-8.jpg" alt="pc2">
+    <img src="005263-R1-055-26.jpg" alt="pc3">
+    <img src="005263-R1-005-1.jpg" alt="pc4">
+    <img src="005263-R1-011-4.jpg" alt="pc5">
+    <img src="005263-R1-013-5.jpg" alt="pc6">
+    <img src="005263-R1-015-6.jpg" alt="pc7">
+    <img src="005263-R1-019-8.jpg" alt="pc8">
+    <img src="005263-R1-055-26.jpg" alt="pc9">
+    <img src="005263-R1-005-1.jpg" alt="pc10">
   </div>
 </section>
 
 <script>
-// Post Cards toggle
+/* Post Cards toggle */
 const postcardsBtn = document.getElementById('postcards-btn');
 const postCards = document.getElementById('post-cards');
 const hero = document.querySelector('.hero');
@@ -176,7 +197,7 @@ backToGallery.addEventListener('click', () => {
   window.scrollTo({top:0,behavior:'smooth'});
 });
 
-// Slider navigation and bubbles
+/* Slider: use native scroll-snap for touch reliability; arrows & JS control remain */
 document.querySelectorAll('.slider').forEach(slider => {
   const slides = slider.querySelector('.slides');
   const images = Array.from(slides.querySelectorAll('img'));
@@ -186,125 +207,62 @@ document.querySelectorAll('.slider').forEach(slider => {
   let index = Math.max(0, parseInt(slider.dataset.index) || 0);
   const slideCount = images.length;
 
-  // helper - current visible slider width
   const slideWidth = () => Math.round(slider.getBoundingClientRect().width);
 
-  // build bubbles (clickable)
+  // create bubbles (clickable)
   bubbleContainer.innerHTML = '';
   images.forEach((_, i) => {
     const bubble = document.createElement('span');
     if (i === index) bubble.classList.add('active');
     bubbleContainer.appendChild(bubble);
-    bubble.addEventListener('click', () => {
-      index = i;
-      updateSlide();
-    });
+    bubble.addEventListener('click', () => goTo(i));
   });
   const bubbles = bubbleContainer.querySelectorAll('span');
 
-  // update transform using pixels (exact)
-  function updateSlide() {
-    slides.style.transition = 'transform 0.45s ease';
-    slides.style.transform = `translateX(-${index * slideWidth()}px)`;
-    bubbles.forEach((b, i) => b.classList.toggle('active', i === index));
+  function updateBubbles() {
+    bubbles.forEach((b,i)=> b.classList.toggle('active', i === index));
     slider.dataset.index = index;
   }
 
-  // if images load later, realign
-  images.forEach(img => img.addEventListener('load', () => {
-    // small timeout to let layout stabilize
-    setTimeout(updateSlide, 20);
-  }));
+  function goTo(i, smooth = true) {
+    index = Math.max(0, Math.min(i, slideCount - 1));
+    const left = index * slideWidth();
+    // programmatic scroll
+    if (smooth) slides.scrollTo({ left, behavior: 'smooth' });
+    else slides.scrollLeft = left;
+    updateBubbles();
+  }
 
-  // initialize after a tick
-  setTimeout(updateSlide, 20);
+  // set initial scroll position (no animation)
+  setTimeout(()=> { goTo(index, false); }, 20);
 
-  // keep alignment on resize/orientation change
+  // keep alignment if images finish loading or window resized
+  images.forEach(img => img.addEventListener('load', () => setTimeout(()=> goTo(index, false), 30)));
   let rto;
   window.addEventListener('resize', () => {
     clearTimeout(rto);
-    rto = setTimeout(() => updateSlide(), 80);
+    rto = setTimeout(() => goTo(index, false), 90);
   });
 
-  // desktop arrows
-  if (prevBtn) prevBtn.addEventListener('click', () => { index = (index - 1 + slideCount) % slideCount; updateSlide(); });
-  if (nextBtn) nextBtn.addEventListener('click', () => { index = (index + 1) % slideCount; updateSlide(); });
+  // arrows
+  prevBtn?.addEventListener('click', () => goTo(index - 1));
+  nextBtn?.addEventListener('click', () => goTo(index + 1));
 
-  // MOBILE TOUCH HANDLERS (fixed)
-  let startX = 0;
-  let startY = 0;
-  let isSwiping = false;
-
-  slides.addEventListener('touchstart', e => {
-    if (!e.touches || e.touches.length > 1) return;
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    isSwiping = false;
-    // disable transition so live-drag feels immediate
-    slides.style.transition = 'none';
-  }, { passive: true });
-
-  slides.addEventListener('touchmove', e => {
-    if (!e.touches || e.touches.length > 1) return;
-    const currentX = e.touches[0].clientX;
-    const currentY = e.touches[0].clientY;
-    const dx = currentX - startX;
-    const dy = currentY - startY;
-
-    // detect horizontal swipe intent
-    if (!isSwiping) {
-      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
-        isSwiping = true;
-      } else {
-        return; // allow vertical scrolling
+  // update index after user scroll ends (debounced)
+  let scrollTimeout;
+  slides.addEventListener('scroll', () => {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      const newIndex = Math.round(slides.scrollLeft / Math.max(1, slideWidth()));
+      if (newIndex !== index) {
+        index = Math.max(0, Math.min(newIndex, slideCount - 1));
+        updateBubbles();
       }
-    }
-
-    // prevent vertical page scroll while swiping horizontally
-    e.preventDefault();
-
-    // live-drag: translate by base (-index*width) plus dx (note: dx sign matters)
-    const offset = -index * slideWidth() + dx; // dx is positive when dragging right, negative when dragging left
-    slides.style.transform = `translateX(${Math.round(offset)}px)`;
-  }, { passive: false });
-
-  slides.addEventListener('touchend', e => {
-    // restore transition
-    slides.style.transition = 'transform 0.45s ease';
-
-    if (!e.changedTouches || e.changedTouches.length === 0) {
-      updateSlide();
-      isSwiping = false;
-      return;
-    }
-
-    const endX = e.changedTouches[0].clientX;
-    const diff = startX - endX;
-    const absDiff = Math.abs(diff);
-    const threshold = Math.max(40, slideWidth() * 0.12); // require larger swipe on big screens
-
-    if (isSwiping && absDiff > threshold) {
-      if (diff > 0) {
-        // swipe left -> next
-        index = Math.min(index + 1, slideCount - 1);
-      } else {
-        // swipe right -> prev
-        index = Math.max(index - 1, 0);
-      }
-    }
-    // always snap to the computed index
-    updateSlide();
-    isSwiping = false;
+    }, 70);
   }, { passive: true });
-
-  slides.addEventListener('touchcancel', () => {
-    slides.style.transition = 'transform 0.45s ease';
-    updateSlide();
-    isSwiping = false;
-  });
 });
 
-// Post Card Zoom + Flip
+/* Post Card Zoom + Flip */
 document.querySelectorAll('.mini-grid img').forEach(img=>{
   img.addEventListener('click',()=>openZoomCard(img));
 });
