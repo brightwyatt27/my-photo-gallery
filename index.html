@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Travel Gallery</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
@@ -35,7 +36,7 @@ h2 { color:#202123; margin-bottom:20px; }
 
 #post-cards { display:none; margin:80px auto; max-width:96vw; }
 #post-cards h2{margin-bottom:20px;}
-.mini-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.mini-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; }
 .mini-grid img { width:100%; aspect-ratio:4/3; object-fit:cover; cursor:pointer; }
 
 .zoom-overlay {
@@ -72,6 +73,22 @@ h2 { color:#202123; margin-bottom:20px; }
 .close-zoom { position:absolute; top:20px; right:20px; background:#b5c6da; color:#202123; border:none; border-radius:5px; padding:10px 15px; font-weight:600; cursor:pointer; z-index:1001; }
 .close-zoom:hover { background:#8ea4bd; }
 
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .hero h1 { font-size:4rem; }
+  .hero p { font-size:1.1rem; }
+}
+@media (max-width: 768px) {
+  .hero { padding:10vh 4% 0 4%; }
+  .hero h1 { font-size:3rem; }
+  .hero p { font-size:1rem; }
+  .enter-btn, .top-link button { padding:8px 12px; font-size:14px; }
+  .slider img { max-height:50vh; }
+  .album-container { margin:20px auto 40px; }
+}
+@media (max-width: 480px) {
+  .mini-grid { grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); }
+}
 </style>
 </head>
 <body>
