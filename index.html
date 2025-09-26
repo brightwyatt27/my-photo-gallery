@@ -194,19 +194,24 @@ document.querySelectorAll('.slider').forEach(slider => {
   };
   updateSlide();
 
-  // desktop arrows
+  // desktop arrows (kept the same)
   slider.querySelector('.prev')?.addEventListener('click',()=>{ index=(index-1+images.length)%images.length; updateSlide(); });
   slider.querySelector('.next')?.addEventListener('click',()=>{ index=(index+1)%images.length; updateSlide(); });
 
-  // mobile swipe
-  let startX=0, endX=0;
-  slides.addEventListener('touchstart', e=>{ startX=e.touches[0].clientX; });
-  slides.addEventListener('touchmove', e=>{ endX=e.touches[0].clientX; });
-  slides.addEventListener('touchend', e=>{
-    const diff=startX-endX;
-    if(Math.abs(diff)>20){
-      if(diff>0) index=(index+1)%images.length;
-      else index=(index-1+images.length)%images.length;
+  // mobile swipe (fixed)
+  let startX = 0;
+  slides.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+  });
+  slides.addEventListener('touchend', e => {
+    const endX = e.changedTouches[0].clientX;
+    const diff = startX - endX;
+    if (Math.abs(diff) > 50) { // threshold so taps don't trigger
+      if (diff > 0) {
+        index = (index + 1) % images.length; // swipe left → next
+      } else {
+        index = (index - 1 + images.length) % images.length; // swipe right → prev
+      }
       updateSlide();
     }
   });
