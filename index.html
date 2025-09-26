@@ -31,11 +31,11 @@ h2 { color:#202123; margin-bottom:20px; }
 .bubbles span.active{background:#b5c6da;}
 
 #post-cards { display:none; margin:80px auto; max-width:96vw; position:relative; }
-#post-cards h2{margin-bottom:20px; margin-top:40px;}
-#back-to-gallery { position:absolute; top:5px; right:10px; padding:10px 15px; background:#b5c6da; color:#202123; font-family:'Montserrat',sans-serif; font-weight:700; border:none; border-radius:5px; cursor:pointer; z-index:1000; }
-#back-to-gallery:hover { background:#8ea4bd; }
+#post-cards h2{margin-bottom:20px;}
+#post-cards .back-to-gallery { position:absolute; top:10px; right:10px; z-index:10; background:#b5c6da; color:#202123; border:none; border-radius:6px; padding:10px 15px; font-family:'Montserrat',sans-serif; font-weight:700; cursor:pointer; }
+#post-cards .back-to-gallery:hover { background:#8ea4bd; }
 
-.mini-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; }
+.mini-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
 .mini-grid img { width:100%; aspect-ratio:4/3; object-fit:cover; cursor:pointer; }
 
 .zoom-overlay {
@@ -78,18 +78,17 @@ h2 { color:#202123; margin-bottom:20px; }
   .hero p { font-size:1.1rem; }
 }
 @media (max-width: 768px) {
-  .hero { padding:10vh 4% 0 4%; background-size:cover; background-position:center; }
+  .hero { padding:5vh 4% 0 4%; background-size:cover; background-position:center; }
   .hero h1 { font-size:2.4rem; }
   .hero p { font-size:0.95rem; }
   .enter-btn, #postcards-btn { padding:8px 12px; font-size:14px; }
 
-  .slider img { max-height:65vh; } /* taller for mobile */
-  .album-container { margin:10px auto 25px; }
-
+  .slider img { max-height:65vh; }
   .nav-button { display:none; } /* hide arrows */
-  .bubbles { margin-top:6px; }
-  .bubbles span { width:7px; height:7px; opacity:0.5; pointer-events:none; } /* decorative only */
+  .bubbles { margin-top:6px; justify-content:center; }
+  .bubbles span { width:7px; height:7px; opacity:0.3; pointer-events:none; }
 }
+
 @media (max-width: 480px) {
   .mini-grid { grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); }
 }
@@ -117,8 +116,6 @@ h2 { color:#202123; margin-bottom:20px; }
         <img src="005263-R1-019-8.jpg" alt="Arizona 2">
         <img src="005263-R1-055-26.jpg" alt="Arizona 3">
       </div>
-      <button class="nav-button prev">&#10094;</button>
-      <button class="nav-button next">&#10095;</button>
     </div>
     <div class="bubbles"></div>
   </div>
@@ -131,16 +128,14 @@ h2 { color:#202123; margin-bottom:20px; }
         <img src="005263-R1-011-4.jpg" alt="Canyonlands 2">
         <img src="005263-R1-013-5.jpg" alt="Canyonlands 3">
       </div>
-      <button class="nav-button prev">&#10094;</button>
-      <button class="nav-button next">&#10095;</button>
     </div>
     <div class="bubbles"></div>
   </div>
 </section>
 
 <section id="post-cards">
+  <button class="back-to-gallery">Back to Gallery</button>
   <h2>Post Cards</h2>
-  <button id="back-to-gallery">Back to Gallery</button>
   <div class="mini-grid">
     <img src="005263-R1-015-6.jpg">
     <img src="005263-R1-019-8.jpg">
@@ -157,57 +152,61 @@ h2 { color:#202123; margin-bottom:20px; }
 
 <script>
 // Post Cards toggle
-const postcardsBtn=document.getElementById('postcards-btn');
-const postCards=document.getElementById('post-cards');
-const hero=document.querySelector('.hero');
-const gallery=document.getElementById('gallery');
-const backToGallery=document.getElementById('back-to-gallery');
+const postcardsBtn = document.getElementById('postcards-btn');
+const postCards = document.getElementById('post-cards');
+const hero = document.querySelector('.hero');
+const gallery = document.getElementById('gallery');
+const backToGallery = document.querySelector('#post-cards .back-to-gallery');
 
-postcardsBtn.addEventListener('click',()=>{
-  hero.style.display='none';
-  gallery.style.display='none';
-  postCards.style.display='block';
+postcardsBtn.addEventListener('click', () => {
+  hero.style.display = 'none';
+  gallery.style.display = 'none';
+  postCards.style.display = 'block';
   window.scrollTo({top:0,behavior:'smooth'});
 });
 
-backToGallery.addEventListener('click',()=>{
-  postCards.style.display='none';
-  hero.style.display='flex';
-  gallery.style.display='block';
+backToGallery.addEventListener('click', () => {
+  postCards.style.display = 'none';
+  hero.style.display = 'flex';
+  gallery.style.display = 'block';
   window.scrollTo({top:0,behavior:'smooth'});
 });
 
 // Slider navigation and bubbles
-document.querySelectorAll('.slider').forEach(slider=>{
-  const slides=slider.querySelector('.slides');
-  const images=slides.querySelectorAll('img');
-  const prev=slider.querySelector('.prev');
-  const next=slider.querySelector('.next');
-  let index=parseInt(slider.dataset.index)||0;
+document.querySelectorAll('.slider').forEach(slider => {
+  const slides = slider.querySelector('.slides');
+  const images = slides.querySelectorAll('img');
+  let index = parseInt(slider.dataset.index) || 0;
 
   // bubbles
-  const bubbleContainer=slider.parentElement.querySelector('.bubbles');
+  const bubbleContainer = slider.parentElement.querySelector('.bubbles');
   images.forEach((img,i)=>{
-    const bubble=document.createElement('span');
+    const bubble = document.createElement('span');
     if(i===0) bubble.classList.add('active');
     bubbleContainer.appendChild(bubble);
-    bubble.addEventListener('click',()=>{ index=i; updateSlide(); });
   });
-  const bubbles=bubbleContainer.querySelectorAll('span');
-  const updateSlide=()=>{ slides.style.transform=`translateX(-${index*100}%)`; bubbles.forEach((b,i)=>b.classList.toggle('active',i===index)); slider.dataset.index=index; };
+  const bubbles = bubbleContainer.querySelectorAll('span');
+
+  const updateSlide = ()=>{
+    slides.style.transform = `translateX(-${index*100}%)`;
+    bubbles.forEach((b,i)=>b.classList.toggle('active', i===index));
+    slider.dataset.index = index;
+  };
   updateSlide();
 
-  prev.addEventListener('click',()=>{ index=(index-1+images.length)%images.length; updateSlide(); });
-  next.addEventListener('click',()=>{ index=(index+1)%images.length; updateSlide(); });
+  // desktop arrows
+  slider.querySelector('.prev')?.addEventListener('click',()=>{ index=(index-1+images.length)%images.length; updateSlide(); });
+  slider.querySelector('.next')?.addEventListener('click',()=>{ index=(index+1)%images.length; updateSlide(); });
 
-  // Mobile swipe for all slides
+  // mobile swipe
   let startX=0, endX=0;
   slides.addEventListener('touchstart', e=>{ startX=e.touches[0].clientX; });
   slides.addEventListener('touchmove', e=>{ endX=e.touches[0].clientX; });
   slides.addEventListener('touchend', e=>{
     const diff=startX-endX;
-    if(Math.abs(diff)>30){ // easier swipe
-      if(diff>0) index=(index+1)%images.length; else index=(index-1+images.length)%images.length;
+    if(Math.abs(diff)>20){
+      if(diff>0) index=(index+1)%images.length;
+      else index=(index-1+images.length)%images.length;
       updateSlide();
     }
   });
@@ -219,18 +218,18 @@ document.querySelectorAll('.mini-grid img').forEach(img=>{
 });
 
 function openZoomCard(img){
-  const overlay=document.createElement('div'); overlay.className='zoom-overlay';
-  const zoomCard=document.createElement('div'); zoomCard.className='zoom-card';
-  const inner=document.createElement('div'); inner.className='zoom-card-inner';
+  const overlay = document.createElement('div'); overlay.className='zoom-overlay';
+  const zoomCard = document.createElement('div'); zoomCard.className='zoom-card';
+  const inner = document.createElement('div'); inner.className='zoom-card-inner';
 
-  const front=document.createElement('img'); front.src=img.src; front.className='front';
-  const back=document.createElement('img'); back.src='005263-R1-011-4.jpg'; back.className='back';
+  const front = document.createElement('img'); front.src = img.src; front.className='front';
+  const back = document.createElement('img'); back.src = '005263-R1-011-4.jpg'; back.className='back';
 
   inner.appendChild(front); inner.appendChild(back);
   zoomCard.appendChild(inner);
   overlay.appendChild(zoomCard);
 
-  const closeBtn=document.createElement('button'); closeBtn.textContent='Close'; closeBtn.className='close-zoom';
+  const closeBtn = document.createElement('button'); closeBtn.textContent = 'Close'; closeBtn.className = 'close-zoom';
   closeBtn.addEventListener('click',()=>overlay.remove());
   overlay.appendChild(closeBtn);
 
