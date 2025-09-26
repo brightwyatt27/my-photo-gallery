@@ -20,7 +20,7 @@ body { font-family:'Didot', serif; background:#fff; color:#202123; text-align:ce
 h2 { color:#202123; margin-bottom:20px; }
 .album-container { max-width:96vw; margin:40px auto 60px; }
 .slider { position:relative; overflow:hidden; box-shadow:0 6px 15px rgba(0,0,0,0.3); }
-.slides { display:flex; transition:transform 0.5s ease; }
+.slides { display:flex; transition:transform 0.5s ease; width:100%; }
 .slides img { width:100%; max-height:80vh; flex-shrink:0; object-fit:cover; cursor:pointer; }
 .nav-button { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.4); color:white; border:none; padding:10px 20px; cursor:pointer; font-size:24px; z-index:2; }
 .nav-button:hover{background:rgba(0,0,0,0.7);}
@@ -84,7 +84,7 @@ h2 { color:#202123; margin-bottom:20px; }
   .enter-btn, #postcards-btn { padding:8px 12px; font-size:14px; }
 
   .slider img { max-height:65vh; }
-  .nav-button { display:none; } /* hide arrows */
+  .nav-button { display:none; } /* hide arrows on mobile */
   .bubbles { margin-top:6px; justify-content:center; }
   .bubbles span { width:7px; height:7px; opacity:0.3; pointer-events:none; }
 }
@@ -116,6 +116,8 @@ h2 { color:#202123; margin-bottom:20px; }
         <img src="005263-R1-019-8.jpg" alt="Arizona 2">
         <img src="005263-R1-055-26.jpg" alt="Arizona 3">
       </div>
+      <button class="nav-button prev">&#10094;</button>
+      <button class="nav-button next">&#10095;</button>
     </div>
     <div class="bubbles"></div>
   </div>
@@ -128,6 +130,8 @@ h2 { color:#202123; margin-bottom:20px; }
         <img src="005263-R1-011-4.jpg" alt="Canyonlands 2">
         <img src="005263-R1-013-5.jpg" alt="Canyonlands 3">
       </div>
+      <button class="nav-button prev">&#10094;</button>
+      <button class="nav-button next">&#10095;</button>
     </div>
     <div class="bubbles"></div>
   </div>
@@ -176,10 +180,13 @@ backToGallery.addEventListener('click', () => {
 document.querySelectorAll('.slider').forEach(slider => {
   const slides = slider.querySelector('.slides');
   const images = slides.querySelectorAll('img');
+  const prevBtn = slider.querySelector('.prev');
+  const nextBtn = slider.querySelector('.next');
   let index = parseInt(slider.dataset.index) || 0;
 
   // bubbles
   const bubbleContainer = slider.parentElement.querySelector('.bubbles');
+  bubbleContainer.innerHTML = ""; // reset
   images.forEach((img,i)=>{
     const bubble = document.createElement('span');
     if(i===0) bubble.classList.add('active');
@@ -194,11 +201,11 @@ document.querySelectorAll('.slider').forEach(slider => {
   };
   updateSlide();
 
-  // desktop arrows (kept the same)
-  slider.querySelector('.prev')?.addEventListener('click',()=>{ index=(index-1+images.length)%images.length; updateSlide(); });
-  slider.querySelector('.next')?.addEventListener('click',()=>{ index=(index+1)%images.length; updateSlide(); });
+  // desktop arrows
+  prevBtn.addEventListener('click',()=>{ index=(index-1+images.length)%images.length; updateSlide(); });
+  nextBtn.addEventListener('click',()=>{ index=(index+1)%images.length; updateSlide(); });
 
-  // mobile swipe (fixed)
+  // mobile swipe
   let startX = 0;
   slides.addEventListener('touchstart', e => {
     startX = e.touches[0].clientX;
@@ -206,12 +213,9 @@ document.querySelectorAll('.slider').forEach(slider => {
   slides.addEventListener('touchend', e => {
     const endX = e.changedTouches[0].clientX;
     const diff = startX - endX;
-    if (Math.abs(diff) > 50) { // threshold so taps don't trigger
-      if (diff > 0) {
-        index = (index + 1) % images.length; // swipe left → next
-      } else {
-        index = (index - 1 + images.length) % images.length; // swipe right → prev
-      }
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) index = (index + 1) % images.length;
+      else index = (index - 1 + images.length) % images.length;
       updateSlide();
     }
   });
