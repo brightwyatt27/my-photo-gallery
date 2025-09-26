@@ -31,8 +31,8 @@ h2 { color:#202123; margin-bottom:20px; }
 .bubbles span.active{background:#b5c6da;}
 
 #post-cards { display:none; margin:80px auto; max-width:96vw; position:relative; }
-#post-cards h2{margin-bottom:20px;}
-#back-to-gallery { position:absolute; top:10px; right:10px; padding:10px 15px; background:#b5c6da; color:#202123; font-family:'Montserrat',sans-serif; font-weight:700; border:none; border-radius:5px; cursor:pointer; z-index:1000; }
+#post-cards h2{margin-bottom:20px; margin-top:40px;}
+#back-to-gallery { position:absolute; top:5px; right:10px; padding:10px 15px; background:#b5c6da; color:#202123; font-family:'Montserrat',sans-serif; font-weight:700; border:none; border-radius:5px; cursor:pointer; z-index:1000; }
 #back-to-gallery:hover { background:#8ea4bd; }
 
 .mini-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; }
@@ -88,7 +88,7 @@ h2 { color:#202123; margin-bottom:20px; }
 
   .nav-button { display:none; } /* hide arrows */
   .bubbles { margin-top:6px; }
-  .bubbles span { width:7px; height:7px; opacity:0.5; }
+  .bubbles span { width:7px; height:7px; opacity:0.5; pointer-events:none; } /* decorative only */
 }
 @media (max-width: 480px) {
   .mini-grid { grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); }
@@ -200,13 +200,13 @@ document.querySelectorAll('.slider').forEach(slider=>{
   prev.addEventListener('click',()=>{ index=(index-1+images.length)%images.length; updateSlide(); });
   next.addEventListener('click',()=>{ index=(index+1)%images.length; updateSlide(); });
 
-  // Mobile swipe (more sensitive)
+  // Mobile swipe for all slides
   let startX=0, endX=0;
   slides.addEventListener('touchstart', e=>{ startX=e.touches[0].clientX; });
   slides.addEventListener('touchmove', e=>{ endX=e.touches[0].clientX; });
   slides.addEventListener('touchend', e=>{
     const diff=startX-endX;
-    if(Math.abs(diff)>30){ // smaller threshold = easier swipe
+    if(Math.abs(diff)>30){ // easier swipe
       if(diff>0) index=(index+1)%images.length; else index=(index-1+images.length)%images.length;
       updateSlide();
     }
@@ -244,6 +244,7 @@ function openZoomCard(img){
 </script>
 </body>
 </html>
+
 
 
 
