@@ -186,13 +186,15 @@ document.querySelectorAll('.slider').forEach(slider => {
   let index = Math.max(0, parseInt(slider.dataset.index) || 0);
   const slideCount = images.length;
 
-  // build bubbles
+  // helper - current visible slider width
+  const slideWidth = () => Math.round(slider.getBoundingClientRect().width);
+
+  // build bubbles (clickable)
   bubbleContainer.innerHTML = '';
   images.forEach((_, i) => {
     const bubble = document.createElement('span');
     if (i === index) bubble.classList.add('active');
     bubbleContainer.appendChild(bubble);
-    // clickable bubbles (optional): jump to that slide
     bubble.addEventListener('click', () => {
       index = i;
       updateSlide();
@@ -200,34 +202,35 @@ document.querySelectorAll('.slider').forEach(slider => {
   });
   const bubbles = bubbleContainer.querySelectorAll('span');
 
-  // helper to get slider visible width
-  const slideWidth = () => Math.round(slider.getBoundingClientRect().width);
-
-  // update transform (uses px so it's exact)
-  const updateSlide = () => {
+  // update transform using pixels (exact)
+  function updateSlide() {
     slides.style.transition = 'transform 0.45s ease';
     slides.style.transform = `translateX(-${index * slideWidth()}px)`;
-    bubbles.forEach((b,i)=> b.classList.toggle('active', i === index));
+    bubbles.forEach((b, i) => b.classList.toggle('active', i === index));
     slider.dataset.index = index;
-  };
+  }
 
-  // initialize
-  // ensure the initial transform uses pixels (in case the layout changed)
-  // wait a tick in case images/layout haven't finished rendering
+  // if images load later, realign
+  images.forEach(img => img.addEventListener('load', () => {
+    // small timeout to let layout stabilize
+    setTimeout(updateSlide, 20);
+  }));
+
+  // initialize after a tick
   setTimeout(updateSlide, 20);
 
-  // resize: keep slide aligned when orientation or width changes
-  let resizeTimeout;
+  // keep alignment on resize/orientation change
+  let rto;
   window.addEventListener('resize', () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(updateSlide, 80);
+    clearTimeout(rto);
+    rto = setTimeout(() => updateSlide(), 80);
   });
 
   // desktop arrows
   if (prevBtn) prevBtn.addEventListener('click', () => { index = (index - 1 + slideCount) % slideCount; updateSlide(); });
   if (nextBtn) nextBtn.addEventListener('click', () => { index = (index + 1) % slideCount; updateSlide(); });
 
-  // robust touch handling for mobile
+  // MOBILE TOUCH HANDLERS (fixed)
   let startX = 0;
   let startY = 0;
   let isSwiping = false;
@@ -237,7 +240,7 @@ document.querySelectorAll('.slider').forEach(slider => {
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
     isSwiping = false;
-    // temporarily disable CSS transition while user may drag (keeps movement crisp)
+    // disable transition so live-drag feels immediate
     slides.style.transition = 'none';
   }, { passive: true });
 
@@ -248,21 +251,21 @@ document.querySelectorAll('.slider').forEach(slider => {
     const dx = currentX - startX;
     const dy = currentY - startY;
 
-    // start horizontal swipe detection if horizontal movement is dominant
+    // detect horizontal swipe intent
     if (!isSwiping) {
-      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
         isSwiping = true;
       } else {
-        return; // let page scroll vertically
+        return; // allow vertical scrolling
       }
     }
 
-    // prevent vertical page scroll when swiping horizontally
+    // prevent vertical page scroll while swiping horizontally
     e.preventDefault();
 
-    // optional: live-drag effect (small and smooth)
-    const offset = -index * slideWidth() + -dx; // dx is currentX - startX; negative when swiping left
-    slides.style.transform = `translateX(${offset}px)`;
+    // live-drag: translate by base (-index*width) plus dx (note: dx sign matters)
+    const offset = -index * slideWidth() + dx; // dx is positive when dragging right, negative when dragging left
+    slides.style.transform = `translateX(${Math.round(offset)}px)`;
   }, { passive: false });
 
   slides.addEventListener('touchend', e => {
@@ -271,13 +274,14 @@ document.querySelectorAll('.slider').forEach(slider => {
 
     if (!e.changedTouches || e.changedTouches.length === 0) {
       updateSlide();
+      isSwiping = false;
       return;
     }
 
     const endX = e.changedTouches[0].clientX;
     const diff = startX - endX;
     const absDiff = Math.abs(diff);
-    const threshold = Math.max(50, slideWidth() * 0.12); // require stronger swipe on big screens
+    const threshold = Math.max(40, slideWidth() * 0.12); // require larger swipe on big screens
 
     if (isSwiping && absDiff > threshold) {
       if (diff > 0) {
@@ -288,7 +292,7 @@ document.querySelectorAll('.slider').forEach(slider => {
         index = Math.max(index - 1, 0);
       }
     }
-    // snap to chosen slide
+    // always snap to the computed index
     updateSlide();
     isSwiping = false;
   }, { passive: true });
@@ -331,3 +335,4 @@ function openZoomCard(img){
 </script>
 </body>
 </html>
+
